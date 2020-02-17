@@ -25,8 +25,8 @@ app.on('window-all-closed', function () {
 })
 
 // IPC Events
-ipcMain.on('go', (event, arg) => {
-  const result = `${arg} squared is ${native.square(arg)}`;
+ipcMain.on('go', (event) => {
+  const contourPath = native.createPath("M 10 10 L 40 10 40 40 10 40 Z")
+  const result = `Path element count is ${native.pathElementCount(contourPath)}`;
   event.returnValue = result;
 })
-

@@ -1,5 +1,5 @@
 #include <node_api.h>
-#include "HollowCore/HollowCore.h"
+#include "../HollowCore/Source/HollowCore.h"
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // MARK: - N-API Convenience
@@ -19,7 +19,7 @@ void HCObjectNAPIInstallReferenceInValue(napi_env env, napi_value value, HCRef s
         napi_throw_error(env, NULL, "Unable to create reference value from reference");
     }
     
-    napi_status status = napi_set_named_property(env, value, "reference", reference_value);
+    status = napi_set_named_property(env, value, "reference", reference_value);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to install reference value into value");
     }
@@ -38,18 +38,18 @@ void HCObjectNAPIReleaseReferenceInValue(napi_env env, napi_value value) {
     }
     
     HCRef reference = NULL;
-    status = napi_get_value_int64(env, reference_value, &reference);
+    status = napi_get_value_int64(env, reference_value, (int64_t*)&reference);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to convert reference value to reference");
     }
     
     napi_value null_value = NULL;
-    napi_status = napi_get_null(env, &null_value);
+    status = napi_get_null(env, &null_value);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to obtain the null value");
     }
     
-    napi_status status = napi_set_named_property(env, value, "reference", null_value);
+    status = napi_set_named_property(env, value, "reference", null_value);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to clear reference value in value");
     }
@@ -70,7 +70,7 @@ HCRef HCObjectNAPIFromValue(napi_env env, napi_value value) {
     }
     
     HCRef reference = NULL;
-    status = napi_get_value_int64(env, reference_value, &reference);
+    status = napi_get_value_int64(env, reference_value, (int64_t*)&reference);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to convert reference value to reference");
     }
@@ -139,7 +139,7 @@ void HCPathNAPIReleaseReferenceInValue(napi_env env, napi_value value) {
 }
 
 HCPathRef HCPathNAPIFromValue(napi_env env, napi_value value) {
-    return HCObjectNAPIFromJObject(env, thiz);
+    return HCObjectNAPIFromValue(env, value);
 }
 
 napi_value HCPathNAPINewValue(napi_env env, HCPathRef self) {
@@ -150,14 +150,14 @@ napi_value HCPathNAPICreate(napi_env env, napi_value svg_path_data_value) {
     napi_status status = napi_generic_failure;
     
     size_t svg_path_data_length = 0;
-    status = napi_get_value_string_utf8(env, value, NULL, sizeof(svg_path_data_length), &svg_path_data_length);
+    status = napi_get_value_string_utf8(env, svg_path_data_value, NULL, sizeof(svg_path_data_length), &svg_path_data_length);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get length of string argument");
     }
-    char svg_path_data[svg_path_data_length] = { NULL };
+    char svg_path_data[svg_path_data_length];
     size_t svg_path_data_copied_length = 0;
-    status = napi_get_value_string_utf8(env, value, svg_path_data, svg_path_data_length, &svg_path_data_copied_length);
-    if (status != napi_ok || svg_path_data_length != svg_path_data_copied_length) {
+    status = napi_get_value_string_utf8(env, svg_path_data_value, svg_path_data, svg_path_data_length, &svg_path_data_copied_length);
+    if (status != napi_ok) {//} || svg_path_data_length != svg_path_data_copied_length) {
         napi_throw_error(env, NULL, "Unable to copy string argument");
     }
     
@@ -175,29 +175,29 @@ napi_value HCPathNAPIElementCount(napi_env env, napi_value value) {
 // MARK: - Sample Functions
 //----------------------------------------------------------------------------------------------------------------------------------
 napi_value createPath(napi_env env, napi_callback_info info) {
-    napi_status status;
-
+    napi_status status = napi_generic_failure;
+    
     size_t argc = 1;
-    napi_value argv = NULL;
-    status = napi_get_cb_info(env, info, &argc, &argv, /*thisArg*/NULL, /*context*/NULL);
+    napi_value argv[1];
+    status = napi_get_cb_info(env, info, &argc, argv, /*thisArg*/NULL, /*context*/NULL);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get function arguments");
     }
     
-    return HCPathNAPICreate(env, argv);
+    return HCPathNAPICreate(env, argv[0]);
 }
 
 napi_value pathElementCount(napi_env env, napi_callback_info info) {
-    napi_status status;
-
+    napi_status status = napi_generic_failure;
+    
     size_t argc = 1;
-    napi_value argv = NULL;
-    status = napi_get_cb_info(env, info, &argc, &argv, /*thisArg*/NULL, /*context*/NULL);
+    napi_value argv[1];
+    status = napi_get_cb_info(env, info, &argc, argv, /*thisArg*/NULL, /*context*/NULL);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get function arguments");
     }
     
-    return HCPathNAPIElementCount(env, argv);
+    return HCPathNAPIElementCount(env, argv[0]);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------
@@ -205,10 +205,10 @@ napi_value pathElementCount(napi_env env, napi_callback_info info) {
 //----------------------------------------------------------------------------------------------------------------------------------
 
 napi_value Init(napi_env env, napi_value exports) {
-    napi_status status;
-
+    napi_status status = napi_generic_failure;
+    
     napi_value hcPathCreateFunction;
-    status = napi_create_function(env, NULL, 0, createPath, NULL, &hcPathCreateFunction);
+    status = napi_create_function(env, "createPath", NAPI_AUTO_LENGTH, createPath, NULL, &hcPathCreateFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to create native function");
     }
@@ -217,7 +217,7 @@ napi_value Init(napi_env env, napi_value exports) {
         napi_throw_error(env, NULL, "Unable to add native function to exports");
     }
     napi_value hcPathElementCountFunction;
-    status = napi_create_function(env, NULL, 0, pathElementCount, NULL, &hcPathElementCountFunction);
+    status = napi_create_function(env, "pathElementCount", NAPI_AUTO_LENGTH, pathElementCount, NULL, &hcPathElementCountFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to create native function");
     }
