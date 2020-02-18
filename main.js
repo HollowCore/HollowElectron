@@ -1,5 +1,5 @@
 const {app, ipcMain, BrowserWindow} = require('electron')
-const path = require('path')
+const filePath = require('path')
 const native = require('./build/Release/HollowElectronNative.node');
 const {Path} = require('./Path.js');
 
@@ -10,7 +10,7 @@ app.on('ready', function () {
     width: 1280,
     height: 720,
     webPreferences: {
-            preload: path.join(app.getAppPath(), 'index_preload.js')
+            preload: filePath.join(app.getAppPath(), 'index_preload.js')
         }
     })
 
@@ -27,7 +27,14 @@ app.on('window-all-closed', function () {
 
 // IPC Events
 ipcMain.on('go', (event) => {
-    const contourPath = new Path("M 10 10 L 40 10 40 40 10 40 Z");
-    const result = `Path element count is ${contourPath.elementCount()}`;
+    const path = new Path("M 10 15 L 40 15 40 40 15 40 Z");
+    const elementCount = path.elementCount();
+    const currentPoint = path.currentPoint();
+    const bounds = path.bounds();
+    const result = `Path:\n
+        elementCount = ${JSON.stringify(elementCount)}\n
+        currentPoint = ${JSON.stringify(currentPoint)}\n
+        bounds = ${JSON.stringify(bounds)}\n
+    `;
     event.returnValue = result;
 })

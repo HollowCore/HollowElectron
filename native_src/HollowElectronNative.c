@@ -4,6 +4,8 @@
 //----------------------------------------------------------------------------------------------------------------------------------
 // MARK: - N-API Convenience
 //----------------------------------------------------------------------------------------------------------------------------------
+#define HCObjectNAPIReferenceProperty "_reference"
+
 void HCObjectNAPIOnLoad(napi_env env, napi_value exports) {
 }
 
@@ -19,7 +21,7 @@ void HCObjectNAPIInstallReferenceInValue(napi_env env, napi_value value, HCRef s
         napi_throw_error(env, NULL, "Unable to create reference value from reference");
     }
     
-    status = napi_set_named_property(env, value, "reference", reference_value);
+    status = napi_set_named_property(env, value, HCObjectNAPIReferenceProperty, reference_value);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to install reference value into value");
     }
@@ -32,7 +34,7 @@ void HCObjectNAPIReleaseReferenceInValue(napi_env env, napi_value value) {
     }
     
     napi_value reference_value = NULL;
-    status = napi_get_named_property(env, value, "reference", &reference_value);
+    status = napi_get_named_property(env, value, HCObjectNAPIReferenceProperty, &reference_value);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to obtain reference value from value");
     }
@@ -49,7 +51,7 @@ void HCObjectNAPIReleaseReferenceInValue(napi_env env, napi_value value) {
         napi_throw_error(env, NULL, "Unable to obtain the null value");
     }
     
-    status = napi_set_named_property(env, value, "reference", null_value);
+    status = napi_set_named_property(env, value, HCObjectNAPIReferenceProperty, null_value);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to clear reference value in value");
     }
@@ -64,7 +66,7 @@ HCRef HCObjectNAPIFromValue(napi_env env, napi_value value) {
     }
     
     napi_value reference_value = NULL;
-    status = napi_get_named_property(env, value, "reference", &reference_value);
+    status = napi_get_named_property(env, value, HCObjectNAPIReferenceProperty, &reference_value);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to obtain reference value from value");
     }
@@ -125,6 +127,78 @@ napi_value HCObjectNAPINewReal(napi_env env, HCReal real) {
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------
+// MARK: - Geometry
+//----------------------------------------------------------------------------------------------------------------------------------
+napi_value HCPointNAPINewValue(napi_env env, HCPoint self) {
+    napi_status status = napi_generic_failure;
+    
+    napi_value value = NULL;
+    status = napi_create_object(env, &value);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to create object");
+    }
+    status = napi_set_named_property(env, value, "x", HCObjectNAPINewReal(env, self.x));
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to set x property in point");
+    }
+    status = napi_set_named_property(env, value, "y", HCObjectNAPINewReal(env, self.y));
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to set y property in point");
+    }
+
+    // TODO: Want reference? Use HCData?
+//    HCObjectNAPIInstallReferenceInValue(env, value, self);
+    
+    return value;
+}
+
+napi_value HCSizeNAPINewValue(napi_env env, HCSize self) {
+    napi_status status = napi_generic_failure;
+    
+    napi_value value = NULL;
+    status = napi_create_object(env, &value);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to create object");
+    }
+    status = napi_set_named_property(env, value, "width", HCObjectNAPINewReal(env, self.width));
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to set width property in size");
+    }
+    status = napi_set_named_property(env, value, "height", HCObjectNAPINewReal(env, self.height));
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to set height property in size");
+    }
+
+    // TODO: Want reference? Use HCData?
+//    HCObjectNAPIInstallReferenceInValue(env, value, self);
+    
+    return value;
+}
+
+napi_value HCRectangleNAPINewValue(napi_env env, HCRectangle self) {
+    napi_status status = napi_generic_failure;
+    
+    napi_value value = NULL;
+    status = napi_create_object(env, &value);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to create object");
+    }
+    status = napi_set_named_property(env, value, "origin", HCPointNAPINewValue(env, self.origin));
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to set origin property in rectangle");
+    }
+    status = napi_set_named_property(env, value, "size", HCSizeNAPINewValue(env, self.size));
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to set size property in rectangle");
+    }
+
+    // TODO: Want reference? Use HCData?
+//    HCObjectNAPIInstallReferenceInValue(env, value, self);
+    
+    return value;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------
 // MARK: - HCPath
 //----------------------------------------------------------------------------------------------------------------------------------
 void HCPathNAPIOnLoad(napi_env env) {
@@ -145,25 +219,6 @@ HCPathRef HCPathNAPIFromValue(napi_env env, napi_value value) {
 napi_value HCPathNAPINewValue(napi_env env, HCPathRef self) {
     return HCObjectNAPINewValue(env, self);
 }
-
-//napi_value HCPathNAPICreate(napi_env env, napi_value svg_path_data_value) {
-//    napi_status status = napi_generic_failure;
-//
-//    size_t svg_path_data_length = 0;
-//    status = napi_get_value_string_utf8(env, svg_path_data_value, NULL, sizeof(svg_path_data_length), &svg_path_data_length);
-//    if (status != napi_ok) {
-//        napi_throw_error(env, NULL, "Unable to get length of string argument");
-//    }
-//    char svg_path_data[svg_path_data_length + 1];
-//    size_t svg_path_data_copied_length = 0;
-//    status = napi_get_value_string_utf8(env, svg_path_data_value, svg_path_data, sizeof(svg_path_data), &svg_path_data_copied_length);
-//    if (status != napi_ok || svg_path_data_length != svg_path_data_copied_length) {
-//        napi_throw_error(env, NULL, "Unable to copy string argument");
-//    }
-//
-//    HCPathRef self = HCPathCreate(svg_path_data);
-//    return HCPathNAPINewValue(env, self);
-//}
 
 void HCPathNAPIInit(napi_env env, napi_value value, napi_value svg_path_data_value) {
     napi_status status = napi_generic_failure;
@@ -190,29 +245,28 @@ napi_value HCPathNAPIElementCount(napi_env env, napi_value value) {
     return HCObjectNAPINewInteger(env, elementCount);
 }
 
+napi_value HCPathNAPICurrentPoint(napi_env env, napi_value value) {
+    HCPathRef self = HCPathNAPIFromValue(env, value);
+    HCPoint currentPoint = HCPathCurrentPoint(self);
+    return HCPointNAPINewValue(env, currentPoint);
+}
+
+napi_value HCPathNAPIBounds(napi_env env, napi_value value) {
+    HCPathRef self = HCPathNAPIFromValue(env, value);
+    HCRectangle bounds = HCPathBounds(self);
+    return HCRectangleNAPINewValue(env, bounds);
+}
+
 //----------------------------------------------------------------------------------------------------------------------------------
 // MARK: - Sample Functions
 //----------------------------------------------------------------------------------------------------------------------------------
-//napi_value createPath(napi_env env, napi_callback_info info) {
-//    napi_status status = napi_generic_failure;
-//
-//    size_t argc = 1;
-//    napi_value argv[1];
-//    status = napi_get_cb_info(env, info, &argc, argv, /*thisArg*/NULL, /*context*/NULL);
-//    if (status != napi_ok) {
-//        napi_throw_error(env, NULL, "Unable to get function arguments");
-//    }
-//
-//    return HCPathNAPICreate(env, argv[0]);
-//}
-
 napi_value pathInit(napi_env env, napi_callback_info info) {
     napi_status status = napi_generic_failure;
     
     size_t argc = 1;
     napi_value argv[1];
     napi_value value;
-    status = napi_get_cb_info(env, info, &argc, argv, &value, /*context*/NULL);
+    status = napi_get_cb_info(env, info, &argc, argv, &value, NULL);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get function arguments");
     }
@@ -227,12 +281,38 @@ napi_value pathElementCount(napi_env env, napi_callback_info info) {
     
     size_t argc = 0;
     napi_value value;
-    status = napi_get_cb_info(env, info, &argc, NULL, &value, /*context*/NULL);
+    status = napi_get_cb_info(env, info, &argc, NULL, &value, NULL);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get function arguments");
     }
     
     return HCPathNAPIElementCount(env, value);
+}
+
+napi_value pathCurrentPoint(napi_env env, napi_callback_info info) {
+    napi_status status = napi_generic_failure;
+    
+    size_t argc = 0;
+    napi_value value;
+    status = napi_get_cb_info(env, info, &argc, NULL, &value, NULL);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to get function arguments");
+    }
+    
+    return HCPathNAPICurrentPoint(env, value);
+}
+
+napi_value pathBounds(napi_env env, napi_callback_info info) {
+    napi_status status = napi_generic_failure;
+    
+    size_t argc = 0;
+    napi_value value;
+    status = napi_get_cb_info(env, info, &argc, NULL, &value, NULL);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to get function arguments");
+    }
+    
+    return HCPathNAPIBounds(env, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------
@@ -251,12 +331,33 @@ napi_value Init(napi_env env, napi_value exports) {
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to add native function to exports");
     }
+    
     napi_value pathElementCountFunction;
     status = napi_create_function(env, "pathElementCount", NAPI_AUTO_LENGTH, pathElementCount, NULL, &pathElementCountFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to create native function");
     }
     status = napi_set_named_property(env, exports, "pathElementCount", pathElementCountFunction);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to add native function to exports");
+    }
+
+    napi_value pathCurrentPointFunction;
+    status = napi_create_function(env, "pathCurrentPoint", NAPI_AUTO_LENGTH, pathCurrentPoint, NULL, &pathCurrentPointFunction);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to create native function");
+    }
+    status = napi_set_named_property(env, exports, "pathCurrentPoint", pathCurrentPointFunction);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to add native function to exports");
+    }
+
+    napi_value pathBoundsFunction;
+    status = napi_create_function(env, "pathBounds", NAPI_AUTO_LENGTH, pathBounds, NULL, &pathBoundsFunction);
+    if (status != napi_ok) {
+        napi_throw_error(env, NULL, "Unable to create native function");
+    }
+    status = napi_set_named_property(env, exports, "pathBounds", pathBoundsFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to add native function to exports");
     }
