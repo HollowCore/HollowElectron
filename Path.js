@@ -17,23 +17,31 @@ Path.prototype.bounds = function() {
 };
 
 Path.prototype.move = function(x, y) {
-  return native.pathMove(x, y);
+    native.pathMove(x, y);
 };
 
 Path.prototype.addLine = function(x, y) {
-  return native.pathAddLine(x, y);
+    native.pathAddLine(x, y);
 };
 
 Path.prototype.addQuadraticCurve = function(cx, cy, x, y) {
-  return native.pathAddQuadraticCurve(cx, cy, x, y);
+    native.pathAddQuadraticCurve(cx, cy, x, y);
 };
 
 Path.prototype.addCubicCurve = function(cx0, cy0, cx1, cy1, x, y) {
-  return native.pathAddCubicCurve(cx0, cy0, cx1, cy1, x, y);
+    native.pathAddCubicCurve(cx0, cy0, cx1, cy1, x, y);
 };
 
 Path.prototype.close = function() {
-  return native.pathClose();
+    native.pathClose();
+};
+
+Path.prototype.containsPoint = function(point) {
+    return native.pathContainsPoint(point);
+};
+
+Path.prototype.intersectsPath = function(other) {
+    return native.pathIntersectsPath(other);
 };
 
 module.exports = {

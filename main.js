@@ -37,13 +37,21 @@ ipcMain.on('go', (event) => {
     path.close();
     path.addCubicCurve(15.0, -10.0, 35.0, -10.0, 40.0, 15.0)
     path.close();
+           
     const elementCount = path.elementCount();
     const currentPoint = path.currentPoint();
     const bounds = path.bounds();
+    const containsPoint = path.containsPoint({x: 30.0, y: 20.0});
+    const containsPoint2 = path.containsPoint({x: 100.0, y: 20.0});
+//    const intersectsPath = path.intersectsPath(new Path("M 5 5 L 50 50"));
+
     const result = `Path:\n
         elementCount = ${JSON.stringify(elementCount)}\n
         currentPoint = ${JSON.stringify(currentPoint)}\n
         bounds = ${JSON.stringify(bounds)}\n
+        containsPoint = ${JSON.stringify(containsPoint)}\n
+        containsPoint2 = ${JSON.stringify(containsPoint2)}\n
     `;
+    
     event.returnValue = result;
 })
