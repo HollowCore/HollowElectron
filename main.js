@@ -27,7 +27,16 @@ app.on('window-all-closed', function () {
 
 // IPC Events
 ipcMain.on('go', (event) => {
-    const path = new Path("M 10 15 L 40 15 40 40 15 40 Z");
+    const path = new Path("M 10 10 L 40 10 Z");
+    path.move(10.0, 15.0);
+    path.addLine(40.0, 15.0);
+    path.addLine(40.0, 40.0);
+    path.addLine(15.0, 40.0);
+    path.close();
+    path.addQuadraticCurve(25.0, -10.0, 40.0, 15.0)
+    path.close();
+    path.addCubicCurve(15.0, -10.0, 35.0, -10.0, 40.0, 15.0)
+    path.close();
     const elementCount = path.elementCount();
     const currentPoint = path.currentPoint();
     const bounds = path.bounds();
