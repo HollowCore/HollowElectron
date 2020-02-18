@@ -131,11 +131,11 @@ void HCPathNAPIOnLoad(napi_env env) {
 }
 
 void HCPathNAPIInstallReferenceInValue(napi_env env, napi_value value, HCPathRef self) {
-    HCPathNAPIInstallReferenceInValue(env, value, self);
+    HCObjectNAPIInstallReferenceInValue(env, value, self);
 }
 
 void HCPathNAPIReleaseReferenceInValue(napi_env env, napi_value value) {
-    HCPathNAPIReleaseReferenceInValue(env, value);
+    HCObjectNAPIReleaseReferenceInValue(env, value);
 }
 
 HCPathRef HCPathNAPIFromValue(napi_env env, napi_value value) {
@@ -146,7 +146,26 @@ napi_value HCPathNAPINewValue(napi_env env, HCPathRef self) {
     return HCObjectNAPINewValue(env, self);
 }
 
-napi_value HCPathNAPICreate(napi_env env, napi_value svg_path_data_value) {
+//napi_value HCPathNAPICreate(napi_env env, napi_value svg_path_data_value) {
+//    napi_status status = napi_generic_failure;
+//
+//    size_t svg_path_data_length = 0;
+//    status = napi_get_value_string_utf8(env, svg_path_data_value, NULL, sizeof(svg_path_data_length), &svg_path_data_length);
+//    if (status != napi_ok) {
+//        napi_throw_error(env, NULL, "Unable to get length of string argument");
+//    }
+//    char svg_path_data[svg_path_data_length + 1];
+//    size_t svg_path_data_copied_length = 0;
+//    status = napi_get_value_string_utf8(env, svg_path_data_value, svg_path_data, sizeof(svg_path_data), &svg_path_data_copied_length);
+//    if (status != napi_ok || svg_path_data_length != svg_path_data_copied_length) {
+//        napi_throw_error(env, NULL, "Unable to copy string argument");
+//    }
+//
+//    HCPathRef self = HCPathCreate(svg_path_data);
+//    return HCPathNAPINewValue(env, self);
+//}
+
+void HCPathNAPIInit(napi_env env, napi_value value, napi_value svg_path_data_value) {
     napi_status status = napi_generic_failure;
     
     size_t svg_path_data_length = 0;
@@ -162,7 +181,7 @@ napi_value HCPathNAPICreate(napi_env env, napi_value svg_path_data_value) {
     }
     
     HCPathRef self = HCPathCreate(svg_path_data);
-    return HCPathNAPINewValue(env, self);
+    HCPathNAPIInstallReferenceInValue(env, value, self);
 }
 
 napi_value HCPathNAPIElementCount(napi_env env, napi_value value) {
@@ -174,30 +193,46 @@ napi_value HCPathNAPIElementCount(napi_env env, napi_value value) {
 //----------------------------------------------------------------------------------------------------------------------------------
 // MARK: - Sample Functions
 //----------------------------------------------------------------------------------------------------------------------------------
-napi_value createPath(napi_env env, napi_callback_info info) {
+//napi_value createPath(napi_env env, napi_callback_info info) {
+//    napi_status status = napi_generic_failure;
+//
+//    size_t argc = 1;
+//    napi_value argv[1];
+//    status = napi_get_cb_info(env, info, &argc, argv, /*thisArg*/NULL, /*context*/NULL);
+//    if (status != napi_ok) {
+//        napi_throw_error(env, NULL, "Unable to get function arguments");
+//    }
+//
+//    return HCPathNAPICreate(env, argv[0]);
+//}
+
+napi_value pathInit(napi_env env, napi_callback_info info) {
     napi_status status = napi_generic_failure;
     
     size_t argc = 1;
     napi_value argv[1];
-    status = napi_get_cb_info(env, info, &argc, argv, /*thisArg*/NULL, /*context*/NULL);
+    napi_value value;
+    status = napi_get_cb_info(env, info, &argc, argv, &value, /*context*/NULL);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get function arguments");
     }
     
-    return HCPathNAPICreate(env, argv[0]);
+    HCPathNAPIInit(env, value, argv[0]);
+    
+    return NULL;
 }
 
 napi_value pathElementCount(napi_env env, napi_callback_info info) {
     napi_status status = napi_generic_failure;
     
-    size_t argc = 1;
-    napi_value argv[1];
-    status = napi_get_cb_info(env, info, &argc, argv, /*thisArg*/NULL, /*context*/NULL);
+    size_t argc = 0;
+    napi_value value;
+    status = napi_get_cb_info(env, info, &argc, NULL, &value, /*context*/NULL);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get function arguments");
     }
     
-    return HCPathNAPIElementCount(env, argv[0]);
+    return HCPathNAPIElementCount(env, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------
@@ -207,21 +242,21 @@ napi_value pathElementCount(napi_env env, napi_callback_info info) {
 napi_value Init(napi_env env, napi_value exports) {
     napi_status status = napi_generic_failure;
     
-    napi_value hcPathCreateFunction;
-    status = napi_create_function(env, "createPath", NAPI_AUTO_LENGTH, createPath, NULL, &hcPathCreateFunction);
+    napi_value pathInitFunction;
+    status = napi_create_function(env, "pathInit", NAPI_AUTO_LENGTH, pathInit, NULL, &pathInitFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to create native function");
     }
-    status = napi_set_named_property(env, exports, "createPath", hcPathCreateFunction);
+    status = napi_set_named_property(env, exports, "pathInit", pathInitFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to add native function to exports");
     }
-    napi_value hcPathElementCountFunction;
-    status = napi_create_function(env, "pathElementCount", NAPI_AUTO_LENGTH, pathElementCount, NULL, &hcPathElementCountFunction);
+    napi_value pathElementCountFunction;
+    status = napi_create_function(env, "pathElementCount", NAPI_AUTO_LENGTH, pathElementCount, NULL, &pathElementCountFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to create native function");
     }
-    status = napi_set_named_property(env, exports, "pathElementCount", hcPathElementCountFunction);
+    status = napi_set_named_property(env, exports, "pathElementCount", pathElementCountFunction);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to add native function to exports");
     }

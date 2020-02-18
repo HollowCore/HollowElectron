@@ -1,6 +1,7 @@
 const {app, ipcMain, BrowserWindow} = require('electron')
 const path = require('path')
 const native = require('./build/Release/HollowElectronNative.node');
+const {Path} = require('./Path.js');
 
 // App Events
 app.on('ready', function () {
@@ -26,7 +27,7 @@ app.on('window-all-closed', function () {
 
 // IPC Events
 ipcMain.on('go', (event) => {
-    const contourPath = native.createPath("M 10 10 L 40 10 40 40 10 40 Z")
-    const result = `Path element count is ${native.pathElementCount(contourPath)}`;
+    const contourPath = new Path("M 10 10 L 40 10 40 40 10 40 Z");
+    const result = `Path element count is ${contourPath.elementCount()}`;
     event.returnValue = result;
 })

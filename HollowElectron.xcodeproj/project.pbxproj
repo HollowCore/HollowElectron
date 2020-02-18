@@ -17,6 +17,7 @@
 		C96782AD23FB628C008A6AA3 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		C96782AE23FB628C008A6AA3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C96782AF23FB62A0008A6AA3 /* native_src */ = {isa = PBXFileReference; lastKnownFileType = folder; path = native_src; sourceTree = "<group>"; };
+		C96782B423FB9457008A6AA3 /* Path.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Path.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -29,6 +30,7 @@
 				C96782A823FB628B008A6AA3 /* index.js */,
 				C96782AA23FB628B008A6AA3 /* index_preload.js */,
 				C96782A723FB628B008A6AA3 /* main.js */,
+				C96782B423FB9457008A6AA3 /* Path.js */,
 				C96782AB23FB628B008A6AA3 /* package.json */,
 				C96782A523FB628B008A6AA3 /* package-lock.json */,
 				C96782AD23FB628C008A6AA3 /* CMakeLists.txt */,
