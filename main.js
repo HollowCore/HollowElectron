@@ -4,20 +4,20 @@ const native = require('./build/Release/HollowElectronNative.node');
 
 // App Events
 app.on('ready', function () {
-  // Create the browser window
-  const mainWindow = new BrowserWindow({
+    // Create the browser window
+    const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     webPreferences: {
-      preload: path.join(app.getAppPath(), 'index_preload.js')
-    }
-  })
+            preload: path.join(app.getAppPath(), 'index_preload.js')
+        }
+    })
 
-  // Load index.html as the window content
-  mainWindow.loadFile('index.html')
+    // Load index.html as the window content
+    mainWindow.loadFile('index.html')
 
-  // Open developer tools
-//  mainWindow.webContents.openDevTools()
+    // Open developer tools
+//    mainWindow.webContents.openDevTools()
 })
 
 app.on('window-all-closed', function () {
@@ -26,7 +26,7 @@ app.on('window-all-closed', function () {
 
 // IPC Events
 ipcMain.on('go', (event) => {
-  const contourPath = native.createPath("M 10 10 L 40 10 40 40 10 40 Z")
-  const result = `Path element count is ${native.pathElementCount(contourPath)}`;
-  event.returnValue = result;
+    const contourPath = native.createPath("M 10 10 L 40 10 40 40 10 40 Z")
+    const result = `Path element count is ${native.pathElementCount(contourPath)}`;
+    event.returnValue = result;
 })

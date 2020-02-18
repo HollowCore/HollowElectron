@@ -154,10 +154,10 @@ napi_value HCPathNAPICreate(napi_env env, napi_value svg_path_data_value) {
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to get length of string argument");
     }
-    char svg_path_data[svg_path_data_length];
+    char svg_path_data[svg_path_data_length + 1];
     size_t svg_path_data_copied_length = 0;
-    status = napi_get_value_string_utf8(env, svg_path_data_value, svg_path_data, svg_path_data_length, &svg_path_data_copied_length);
-    if (status != napi_ok) {//} || svg_path_data_length != svg_path_data_copied_length) {
+    status = napi_get_value_string_utf8(env, svg_path_data_value, svg_path_data, sizeof(svg_path_data), &svg_path_data_copied_length);
+    if (status != napi_ok || svg_path_data_length != svg_path_data_copied_length) {
         napi_throw_error(env, NULL, "Unable to copy string argument");
     }
     
